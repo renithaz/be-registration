@@ -86,7 +86,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string',
                 'email' => 'required|email|unique:users,email,'. $id,
-                'password' => 'required|min:6'
+             
             ]);
 
             if($validator->fails()){
@@ -100,10 +100,13 @@ class UserController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
             ];
+            $user = User::find($id);
 
             //jika user mengisi password
-            if($request->filled('password')){
+            if($request->password){
                 $data['password'] = $request->password;
+            } else{
+                $data['password'] = $user->password;
             }
 
             $user = User::find($id);
