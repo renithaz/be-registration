@@ -2,38 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\ResponseHelper;
 
-
-class UserController extends Controller
+class RoleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    
-    public function index()
-    {
-        $users = User::all();
+    public function index(){
+        $roles = Role::all();
         return response()->json([
             'status' => true,
             'message' => 'Get user success',
-            'data' => $users,
+            'data' => $roles,
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         try {
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string',
-                'email' => 'required|email|unique:users,email',
-                'password' => 'required|min:6'
             ]);
 
             if ($validator->fails()) {
@@ -45,16 +34,14 @@ class UserController extends Controller
             }
 
             //query insert
-            $user = User::create([
+            $role = Role::create([
                 'name' => $request->name,
-                'email' => $request->email,
-                'password' => $request->password,
             ]);
 
             return response()->json([
                 'status' => true,
-                'message' => 'Registration success',
-                'data' => $user,
+                'message' => 'Success',
+                'data' => $role,
             ], 201);
         } catch (\Throwable $th) {
             return response()->json([
@@ -65,32 +52,26 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
-        $user = User::find($id);
+        $role = Role::find($id);
         return response()->json([
             'status' => true,
             'message' => 'Get user by id success',
-            'data' => $user,
+            'data' => $role,
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
         try {
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string',
-                'email' => 'required|email|unique:users,email,'. $id,
-             
+                'email' => 'required|email|unique:users,email,' . $id,
+
             ]);
 
-            if($validator->fails()){
+            if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Validation error'
@@ -101,16 +82,16 @@ class UserController extends Controller
                 'name' => $request->name,
                 'email' => $request->email,
             ];
-            $user = User::find($id);
+            $user = Role::find($id);
 
             //jika user mengisi password
-            if($request->password){
+            if ($request->password) {
                 $data['password'] = $request->password;
-            } else{
+            } else {
                 $data['password'] = $user->password;
             }
 
-            $user = User::find($id);
+            $user = Role::find($id);
             $user->update($data);
             return response()->json([
                 'status' => true,
@@ -126,13 +107,10 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         try {
-            $user = User::destroy($id);
+            $role = Role::destroy($id);
             return response()->json([
                 'status' => true,
                 'message' => 'Delete user success'
