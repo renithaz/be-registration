@@ -7,20 +7,18 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use App\Helpers\ResponseHelper;
 
-
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    
     public function index()
     {
-        $users = User::all();
+        $users = User::with('role')->get();
         return response()->json([
             'status' => true,
             'message' => 'Get user success',
-            'data' => $users,
+            'data'  => $users,
         ]);
     }
 
@@ -39,28 +37,28 @@ class UserController extends Controller
             if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'validation error',
+                    'message' => 'Validation error',
                     'error' => $validator->errors()
                 ], 422);
             }
-
-            //query insert
+            // query insert
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => $request->password,
+                'role_id' => $request->role_id
             ]);
 
             return response()->json([
-                'status' => true,
+                'status'  => true,
                 'message' => 'Registration success',
-                'data' => $user,
+                'data'    => $user,
             ], 201);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error',
-                'error' => $th->getMessage()
+                'error'  => $th->getMessage() //tdak boleh dimunculkan di prod
             ], 500);
         }
     }
@@ -74,7 +72,7 @@ class UserController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Get user by id success',
-            'data' => $user,
+            'data'  => $user,
         ]);
     }
 
@@ -86,11 +84,10 @@ class UserController extends Controller
         try {
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string',
-                'email' => 'required|email|unique:users,email,'. $id,
-             
+                'email' => 'required|email|unique:users,email,' . $id,
             ]);
 
-            if($validator->fails()){
+            if ($validator->fails()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Validation error'
@@ -100,28 +97,29 @@ class UserController extends Controller
             $data = [
                 'name' => $request->name,
                 'email' => $request->email,
+                'role_id' => $request->role_id
             ];
             $user = User::find($id);
 
-            //jika user mengisi password
-            if($request->password){
+            // jika user mengisi password
+            if ($request->filled('password')) {
                 $data['password'] = $request->password;
-            } else{
+            } else {
                 $data['password'] = $user->password;
             }
 
-            $user = User::find($id);
+
             $user->update($data);
             return response()->json([
                 'status' => true,
                 'message' => 'Update user success',
-                'data' => $user,
+                'data'   => $user,
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error',
-                'error' => $th->getMessage(),
+                'error'   => $th->getMessage(),
             ], 500);
         }
     }
@@ -135,13 +133,13 @@ class UserController extends Controller
             $user = User::destroy($id);
             return response()->json([
                 'status' => true,
-                'message' => 'Delete user success'
+                'message' => 'Delete user success',
             ]);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => false,
                 'message' => 'Internal server error',
-                'error' => $th->getMessage(),
+                'error'   => $th->getMessage(),
             ], 500);
         }
     }
